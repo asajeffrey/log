@@ -564,6 +564,25 @@ impl Log for NopLogger {
     fn log(&self, _: &LogRecord) {}
 }
 
+/// A logger that logs to both of its arguments
+pub struct BothLogger<L1, L2>(L1, L2);
+
+impl<L1, L2> Log for BothLogger<L1, L2> where L1: Log, L2: Log {
+    fn enabled(&self, data: &LogMetadata) -> bool {
+        self.0.enabled(data) || self.1.enabled(data)
+    }
+
+    fn log(&self, record: &LogRecord) {
+        self.0.log(record);
+        self.1.log(record);
+    }
+}
+
+/// Build a logger that logs to both of its arguments
+pub fn both<L1, L2>(l1: L1, l2: L2) -> BothLogger<L1, L2> {
+    BothLogger(l1, l2)
+}
+
 /// The location of a log message.
 ///
 /// # Warning
